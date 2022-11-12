@@ -214,3 +214,22 @@ int function HexToInt(string hexString)
   endWhile
   return result
 endFunction
+
+String Function IntToHex( Int _input )
+  ; from https://forums.nexusmods.com/index.php?/topic/8441118-convert-decimal-formid-to-hexadecimal/page-2#entry95344608
+
+	Int _value = _input
+	String _hex = ""
+
+	While ( _value > 0 )
+
+		Int _remainder = _value % 16
+
+		_hex = StringUtil.GetNthChar( "0123456789abcdef", _remainder ) + _hex
+		_value /= 16
+
+	EndWhile
+
+	Return _hex
+
+EndFunction

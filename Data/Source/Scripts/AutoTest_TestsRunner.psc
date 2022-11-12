@@ -128,6 +128,7 @@ function RunTests(Quest questScript) global
     AutoTest_Log.Log("Start running " + testType + " tests...")
     scriptTest.BeforeTestsRun()
     int nbrTests = scriptTest.NbrRegisteredTests()
+    AutoTest_Log.Log(nbrTests  + " " + testType + " tests...")
     int idxTest = 0
     while idxTest < nbrTests && InTestsSession()
       string testName = scriptTest.GetTestName(idxTest)

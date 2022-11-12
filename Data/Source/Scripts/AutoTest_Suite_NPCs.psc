@@ -13,6 +13,15 @@ ObjectReference Property ViewPointAnchor Auto
 ; Marker where the NPCs are teleported for screenshots
 ObjectReference Property TeleportAnchor Auto
 
+string gModName = ""
+string gModName2 = ""
+string gScreenShotBaseName
+string gFormID
+string gPluginID
+string BatchCommand = ""
+string BatchPath = ""
+int gPrintScreenKey = 183
+
 ; Initialize the script
 ; [API] This function is mandatory and has to use SetTestType
 function InitTests()
@@ -29,11 +38,22 @@ endFunction
 ; [API] This function is optional
 function BeforeTestsRun()
   ; TODO: get PC Scale
+  gPrintScreenKey = Input.GetMappedKey("Screenshot")
+  gScreenShotBaseName = Utility.GetINIString("sScreenShotBaseName:Display")
+  ; Log("[User ScreenShot Folder - " + gScreenShotBaseName + "]")
+  utility.SetINIString ("sScreenShotBaseName:Display","./data/skse/plugins/StorageUtilData/")
   ConsoleUtil.ExecuteCommand("tgm")
   ConsoleUtil.ExecuteCommand("tcai")
   ConsoleUtil.ExecuteCommand("tai")
-  ; TODO disable UI
+  
   ConsoleUtil.ExecuteCommand("tm")
+  BatchCommand = "SETLOCAL EnableExtensions\n"
+  MiscUtil.WriteToFile("./data/skse/plugins/StorageUtilData/renameNPC.bat", BatchCommand, false, false)
+
+  BatchCommand = ""
+  MiscUtil.WriteToFile("./data/skse/plugins/StorageUtilData/renameNPC_Custom.bat", BatchCommand, false, false)
+; todo delete old png files
+
 endFunction
 
 ; Run a given registered test.
@@ -44,15 +64,61 @@ endFunction
 ; * *testName* (string): The test name to run
 function RunTest(string testName)
   string[] fields = StringUtil.Split(testName, "/")
-  
+  gPluginID = fields[0]
+  if fields.length == 3
+    gModName = fields[2] + "/"
+    gModName2 = fields[2]
+  else 
+    gModName = gPluginID + "/"
+    gModName2 = gPluginID
+  endIf
+  Log("[ " + gPluginID + "/" + gFormID + " ]")
   int formId = 0
   if (StringUtil.SubString(fields[1], 0, 2) == "0x")
     formId = HexToInt(StringUtil.SubString(fields[1], 2))
+    gFormID = StringUtil.SubString(fields[1], 2)
   else
-    formId = fields[1] as int
+      formId = fields[1] as int
+      gFormID = IntToHex(formID)
   endIf
+  
+  if (StringUtil.GetLength(gFormID)) == 8
+    if (StringUtil.SubString(gFormID, 0, 2) == "FE")
+      gFormID = "0000" + StringUtil.SubString(gFormID, 4)
+    else
+      gFormID = "00" + StringUtil.SubString(gFormID, 2)
+    endIf
+  else
+    ; need a pad string function
+    int s = (StringUtil.GetLength(gFormID))
+    if s == 1 
+      gFormID = "0000000" + gFormID
+    endif
+    if s == 2 
+      gFormID = "000000" + gFormID
+    endif
+    if s == 3
+      gFormID = "00000" + gFormID
+    endif
+    if s == 4 
+      gFormID = "0000" + gFormID
+    endif
+    if s == 5 
+      gFormID = "000" + gFormID
+    endif
+    if s == 6 
+      gFormID = "00" + gFormID
+    endif
+    if s == 7 
+      gFormID = "0" + gFormID
+    endif
+
+  endIf
+  Log("[ " + gPluginID + "/" + gFormID + " ]")
   ScreenshotOf(formId, fields[0])
   SetTestStatus(testName, "ok")
+ 
+  
 endFunction
 
 ; Finalize the runs of tests
@@ -62,8 +128,9 @@ function AfterTestsRun()
   ConsoleUtil.ExecuteCommand("tai")
   ConsoleUtil.ExecuteCommand("tcai")
   ConsoleUtil.ExecuteCommand("tgm")
-  ; TODO enable UI
+  
   ConsoleUtil.ExecuteCommand("tm")
+  utility.SetINIString ("sScreenShotBaseName:Display",gScreenShotBaseName)
 endFunction
 
 ; Register a screenshot test of a given BaseID
@@ -81,14 +148,15 @@ endFunction
 ; * *baseId* (Integer): The BaseID to clone and take screenshot
 ; * *espName* (String): The name of the ESP containing this base ID
 function ScreenshotOf(int baseId, string espName)
-
+  
+  string[] aScreenShots
   int formId = baseId + Game.GetModByName(espName) * 16777216
   Form formToSpawn = Game.GetFormFromFile(formId, espName)
   string formName = formToSpawn.GetName()
   Log("[ " + espName + "/" + baseId + " ] - [ Start ] - Take screenshot of FormID 0x" + formId + " (" + formName + ")")
   Game.GetPlayer().MoveTo(ViewPointAnchor)
   ObjectReference newRef = TeleportAnchor.PlaceAtMe(formToSpawn)
-  ; TODO: Add option for clothes here
+  
 
   string nonNudeNPC = GetConfig("non_nude")
   if nonNudeNPC != "true"
@@ -107,12 +175,30 @@ function ScreenshotOf(int baseId, string espName)
 
   ; ensure PC 1st party view (summoning some NPCs seem to change POV)
   Game.ForceFirstPerson()
-  ; TODO: ensure PC is looking at NPC
+  
 
   ; Print Screen
-  ; TODO: grab PrintScreen key from Config
-  Input.TapKey(183)
-  ; TODO: Rename/Relocate Screenshots
+  
+  Input.TapKey(gPrintScreenKey)
+
+  Utility.wait(1.0)
+  ; Rename/Relocate Screenshots
+  ; Option 1: mugshots/modname/plugin name/npc formid.png (EasyNPC format)
+  ; Option 2: NPC Name (formid) - Modname - Plugin.png
+  aScreenShots = MiscUtil.FilesInFolder("./data/skse/plugins/StorageUtilData/", "png")
+  int s 
+  s = aScreenShots.Length
+  s = (s - 1)
+
+  BatchCommand = "Rename " +  aScreenShots[s] + " \"" + formName + " (" + gFormID + ") - " + gModName2 + " - " + gPluginID  + ".png\"\n"
+  MiscUtil.WriteToFile("./data/skse/plugins/StorageUtilData/renameNPC_Custom.bat", BatchCommand, true, false)
+
+  BatchCommand = "if not exist " + " \"mugshots/" + gModName  + gPluginID  + "/body\"/ " + "md " + " \"mugshots/" + gModName  + gPluginID  + "/body\"\n"
+  MiscUtil.WriteToFile("./data/skse/plugins/StorageUtilData/renameNPC.bat", BatchCommand, true, false)
+  ; Log("[Batch Command - " + BatchCommand + "]")
+  BatchCommand = "Move " +  aScreenShots[s] + " \"./mugshots/" + gModName  + gPluginID  + "/body/" + gFormID  + ".png\"\n"
+  MiscUtil.WriteToFile("./data/skse/plugins/StorageUtilData/renameNPC.bat", BatchCommand, true, false)
+  ; Log("[Batch Command - " + BatchCommand + "]")
   ; Remove the reference
   newRef.DisableNoWait()
   newRef.Delete()
