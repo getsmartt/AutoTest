@@ -2,7 +2,7 @@
   Export NPCs Test Suite - AutoTest_NPCs_Run.json
   
 }
-unit AutoTest_NPCs;
+unit AutoTest_NPC_noPrisoners;
 
 var
   slCsv: TStringList;
@@ -30,14 +30,16 @@ var
 begin
   // AddMessage('Processing: ' + FullPath(e));
    if (Signature(e) = 'NPC_') and (ElementExists(e, 'FULL')) then begin
-    slCsv.Add(
-      i + '			' +
-      '"' + GetFileName(GetFile(MasterOrSelf(e))) + '/0x' +
-      IntToHex(FixedFormID(e), 8) + '/' +
-      GetFileName(GetFile(e)) + '"'
-      
-    );
-    i := ',';
+    If (LowerCase(GetElementEditValues(e, 'FULL')) <> 'prisoner') then begin
+      slCsv.Add(
+        i + '			' +
+        '"' + GetFileName(GetFile(MasterOrSelf(e))) + '/0x' +
+        IntToHex(FixedFormID(e), 8) + '/' +
+        GetFileName(GetFile(e)) + '"'
+        
+      );
+      i := ',';
+    end;  
   end;
   Result := 0;
 end;

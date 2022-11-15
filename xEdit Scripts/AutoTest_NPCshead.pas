@@ -2,7 +2,7 @@
   Export NPCs Test Suite - AutoTest_NPCs_Run.json
   
 }
-unit AutoTest_NPCs;
+unit AutoTest_NPCshead;
 
 var
   slCsv: TStringList;
@@ -49,9 +49,9 @@ begin
   slCsv.Add ('		]');
   slCsv.Add ('	}');
   slCsv.Add ('}');
-  slCsv.SaveToFile(DataPath + 'SKSE\Plugins\StorageUtilData\AutoTest_NPCs_Run.json');
+  slCsv.SaveToFile(DataPath + 'SKSE\Plugins\StorageUtilData\AutoTest_npcshead_Run.json');
   slCsv.Free;
-  AddMessage('Export done in ' + DataPath + 'SKSE\Plugins\StorageUtilData\AutoTest_NPCs_Run.json');
+  AddMessage('Export done in ' + DataPath + 'SKSE\Plugins\StorageUtilData\AutoTest_npcshead_Run.json');
   // Application.Terminate;
   // ExitProcess(0);
   Result := 0;

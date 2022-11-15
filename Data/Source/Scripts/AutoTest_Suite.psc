@@ -161,6 +161,11 @@ function ClearRegisteredTests()
   SaveDb()
 endFunction
 
+; NOTE: Both of the below functions are included in powerofthree's Papyrus Extender
+; Is it worth adding another master to use them?
+    ; String Function IntToString(int aiValue, bool abHex) global native
+    ; int Function StringToInt(String asString) global native
+
 ; Convert a String storing a hex number into an int
 ;
 ; Parameters::
@@ -215,6 +220,10 @@ int function HexToInt(string hexString)
   return result
 endFunction
 
+; Parameters::
+; * *_input* (integer): The integer (formid) to convert to hex
+; Result::
+; * string: The corresponding Hex value without leading 0x
 String Function IntToHex( Int _input )
   ; from https://forums.nexusmods.com/index.php?/topic/8441118-convert-decimal-formid-to-hexadecimal/page-2#entry95344608
 

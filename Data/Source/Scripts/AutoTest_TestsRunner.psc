@@ -23,6 +23,16 @@ function StartTestsSession() global
   ; Don't use ConsoleUtil to save: it results in the game hanging
   ; ConsoleUtil.ExecuteCommand("save auto_test")
   Game.SaveGame("auto_test")
+
+  ; Delete old .png files
+  string[] aScreenShots = MiscUtil.FilesInFolder("./data/skse/plugins/StorageUtilData/", "png")
+  int s 
+  s = aScreenShots.Length
+  s = (s - 1)
+  while s > -1
+    JContainers.removeFileAtPath("./data/skse/plugins/StorageUtilData/" + aScreenShots[s])
+    s = (s - 1)
+  endWhile
 endFunction
 
 ; End the tests session

@@ -199,6 +199,12 @@ function ScreenshotOf(int baseId, string espName)
   BatchCommand = "Move " +  aScreenShots[s] + " \"./mugshots/" + gModName  + gPluginID  + "/body/" + gFormID  + ".png\"\n"
   MiscUtil.WriteToFile("./data/skse/plugins/StorageUtilData/renameNPC.bat", BatchCommand, true, false)
   ; Log("[Batch Command - " + BatchCommand + "]")
+
+  ; Batch command to grab containing folder of plugin
+  ; for /d  + " /"" + gModPath + "\""  %%a in (*) do  @if exist %%a\ + " /"" + gModName + "\"\n"
+  ; https://ss64.com/nt/for_d.html
+  ; https://stackoverflow.com/questions/2700512/windows-batch-file-to-list-folders-that-have-a-specific-file-in-them
+
   ; Remove the reference
   newRef.DisableNoWait()
   newRef.Delete()
